@@ -1,0 +1,39 @@
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+  - job_name: 'app_containers'
+    static_configs:
+      - targets: ['app1:5000', 'app2:5000', 'app3:5000']  # Instancias de la aplicación
+
+  - job_name: 'nginx_lb'
+    static_configs:
+      - targets: ['nginx_lb:80']  # Balanceador de carga
+
+  - job_name: 'database'  # Monitoreo de la base de datos PostgreSQL
+    static_configs:
+      - targets: ['db:5432']  # Nombre del contenedor o IP de la base de datos y su puerto
+    metrics_path: /metrics
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: instance
+        replacement: 'database'
+
+  - job_name: 'cache'  # Monitoreo de la caché Redis
+    static_configs:
+      - targets: ['cache:6379']  # Nombre del contenedor o IP de la caché y su puerto
+    metrics_path: /metrics
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: instance
+        replacement: 'cache'
+
+
+  - job_name: 'fluent-bit'
+    static_configs:
+      - targets: ['fluent-bit:24224']  # Nombre del contenedor o IP de Fluent Bit y su puerto
+    metrics_path: /api/v1/metrics
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: instance
+        replacement: 'fluent-bit'
